@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="language" content="en" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+	<script type="text/javascript" src="js/d3.js"></script>
+	<title>Topic List</title>
+	<style>
+		body {
+			background-color: #ffffff;
+			overflow-x: hidden;
+			font-family: "PT Sans",sans-serif;
+		}
+		.pageContainer {
+			margin: auto;
+		}
+		.titleBar {
+			display: block;
+			width: 100%;
+		}
+		.pageTitle {
+			height: 40px;
+			width: auto;
+			float: left;
+			padding-top: 20px;
+			padding-left: 10px;
+		}
+		.pageName {
+			font-weight: bold;
+			font-size: 24px;
+			color: #009ddf;
+		}
+		.courseInfo {
+			height: 60px;
+			float: right;
+			padding-left: 14px;
+			border-left: 1px solid #e9e9e9;
+		}
+		.logo {
+			height: 45px;
+			width: 150px;
+			float: left;
+			background-image: url(logo.svg);
+			background-position: right;
+			background-size: contain;
+			background-repeat: no-repeat;
+		}
+		.courseName {
+			text-align: left;
+			font-size: 16px;
+			color: #999999;
+		}
+		#legend {
+			padding-left: 10px;
+			border-left: 2px solid #e9e9e9;
+			margin-left: 10px;
+		}
+		#legendul {
+			padding-left: 0px;
+			text-decoration: none;
+			list-style: none;
+		}
+		.legendColor {
+			height: 12px;
+			width: 12px;
+			padding: 0px;
+			margin: 4px 10px 7px 4px;
+		}
+		.legendName {
+			font-size: 12px;
+			color: #666666;
+			text-decoration: none;
+		}
+		li {
+			padding-bottom: 10px;
+		}
+		.topicIcon {
+			display: inline-block;
+			height: 40px;
+			width: 40px;
+			background-size: contain;
+			background-repeat: no-repeat;
+			position: relative;
+			top: 8px;
+		}
+		.topicName {
+			display: inline-block;
+			text-decoration: none;
+			color: #009ddf;
+			font-size: 24px;
+			padding: 0px 10px;
+		}
+		.strandName {
+			display: inline-block;
+			text-decoration: none;
+			color: #999999;
+			font-size: 16px;
+		}
+		.clearfix { clear: both; }
+		h3 { color: #aaaaaa; margin: 6px 0px 3px 0px; }
+
+	</style>
+	        
+</head>
+
+<body>  
+<div class="pageContainer">
+    <div class="titleBar">
+		<div class="pageTitle">
+			<div class="pageName">List of Topics</div>
+		</div>
+		<div class="courseInfo" href="">
+			<div class="logo"></div>
+			<div class="courseName"></div>
+		</div>
+    </div>
+	<div class="clearfix"></div>
+    
+	<div id="pageContent" style="background-color: #ffffff;">
+		<div id="legend">
+			<ul id="legendul"></ul>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+			
+		//Load list of topics, with their colours
+		d3.json("topics.json", function(error, topicData) {
+			if (error) {
+				alert("Topic data did not load.");
+			} else {
+				d3.selectAll(".courseName").text(topicData.course);
+				topicData.topics.forEach(function(t,i) {
+					console.log(t);
+					topicIconURL = "url(icons/" + t.TopicIcon + ")";
+					li = d3.select("#legendul").append("li");
+					topic = li.append("a").attr("class","legendItem").attr("href","topicmap.html?topic=" + t.TopicGUID);
+					topic.append("div").attr("class","topicIcon").style("-webkit-mask-image", topicIconURL).style("mask-image", topicIconURL).style("background-color",t.Color);
+					topic.append("div").attr("class","topicName").text(t.TopicName);
+					topic.append("div").attr("class","strandName").text(t.StrandName);
+				});
+			}
+		});
+		
+	</script>
+	 
+</div>
+    
+</body>
+</html>

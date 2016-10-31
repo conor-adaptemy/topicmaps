@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 44 44" enable-background="new 0 0 44 44" xml:space="preserve">
+<ellipse fill="none" stroke="#A1A1A1" stroke-miterlimit="10" cx="22.2" cy="7.4" rx="15.1" ry="5.4"/>
+<ellipse fill="none" stroke="#A1A1A1" stroke-miterlimit="10" cx="22.2" cy="36.6" rx="15.1" ry="5.4"/>
+<line fill="none" stroke="#A1A1A1" stroke-miterlimit="10" x1="7.1" y1="7.4" x2="7.1" y2="36.6"/>
+<line fill="none" stroke="#A1A1A1" stroke-miterlimit="10" x1="37.3" y1="7.4" x2="37.3" y2="36.6"/>
+<circle fill="#A1A1A1" cx="22.3" cy="7.1" r="1.6"/>
+<g>
+	<g>
+		<line fill="none" stroke="#A1A1A1" stroke-linecap="round" stroke-linejoin="round" x1="22.2" y1="7.5" x2="22.2" y2="13.5"/>
+		
+			<line fill="none" stroke="#A1A1A1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3.4359,3.4359,3.4359,3.4359" x1="22.2" y1="16.9" x2="22.2" y2="28.9"/>
+		<line fill="none" stroke="#A1A1A1" stroke-linecap="round" stroke-linejoin="round" x1="22.2" y1="30.7" x2="22.2" y2="36.7"/>
+	</g>
+</g>
+<circle fill="#A1A1A1" cx="22.3" cy="36.5" r="1.6"/>
+<line fill="#A1A1A1" x1="22.3" y1="36.5" x2="32.4" y2="40.5"/>
+<line fill="none" stroke="#A1A1A1" stroke-miterlimit="10" x1="22.4" y1="36.5" x2="32.2" y2="40.4"/>
+</svg>
