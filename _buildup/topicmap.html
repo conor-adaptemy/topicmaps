@@ -48,6 +48,7 @@
 		.strandName {
 			font-size: 16px;
 			color: #999999;
+			white-space: nowrap;
 		}
 		.courseInfo {
 			height: 60px;
@@ -72,11 +73,13 @@
 			text-align: left;
 			font-size: 14px;
 			color: #999999;
+			white-space: nowrap;
 		}
 		#topicMapCanvas {
 			width: 100%;
 			position: fixed;
-			top: 70px;
+			top: 0px;
+			z-index: -500;
 		}
 		.ui { cursor: pointer; }
 	</style>
@@ -115,7 +118,7 @@
 		var viewSize = {width: 960, height: 600};
 
 		var fontSize = 10, offset = 10, baseScale = 120;
-		var radius = 10, strokeWidth = 3;
+		var radius = 12, strokeWidth = 3;
 		var baseDelay = 300;
 		
 		var topicURL = String(window.location.search).substr(7,100);
@@ -158,8 +161,8 @@
 						d.rankX = d.x;
 						d.rankY = d.y;
 						d.x = baseScale * (0.5 + d.x - minX);
-						d.y = baseScale * (0.5 + maxY - d.y);
-						d.delay = baseDelay * (d.rankX + 0.3 * Math.abs(d.rankY/maxY));
+						d.y = baseScale * (0.5 + maxY - d.y) + 60;
+						d.delay = 1000 + baseDelay * (d.rankX + 0.3 * Math.abs(d.rankY/maxY));
 						d.labelLines = getLines(d.ConceptName);
 						d.topicData = topicData.topics.filter(function(t) {
 							return t.TopicGUID === d.TopicGUID;
@@ -178,14 +181,14 @@
 							d.radius = strokeWidth/2;
 							d.color = "#cccccc";
 						}
-						console.log(d);
+						//console.log(d);
 					});
 					//Calculate the size of the graph svg
 					graphSize.width = baseScale * (1.2 + maxX - minX);
-					graphSize.height = baseScale * (1 + maxY - minY);
+					graphSize.height = baseScale * (1 + maxY - minY) + 70;
 					//Set up the dimensions for rendering
-					viewSize.width = window.innerWidth - 20;
-					viewSize.height = window.innerHeight - 80;
+					viewSize.width = window.innerWidth - 10;
+					viewSize.height = window.innerHeight - 10;
 					svgViewbox = d3.select('#topicMapCanvas').append("svg")
 						.attr("width", viewSize.width)
 						.attr("height", viewSize.height)
@@ -212,7 +215,7 @@
 						e.path = points;
 						e.delay = e.target.delay;
 						e.length = Math.sqrt(Math.pow(e.target.x - e.source.x,2) + Math.pow(e.target.y - e.source.y,2));
-						console.log(e);
+						//console.log(e);
 					});
 					
 					//Render the data to the SVG element
@@ -386,9 +389,10 @@
 						.data(graph.nodes)
 						.enter().append("circle")
 						.attr("class", "ui")
-						.attr("r", 30)					
+						.attr("r", 24)					
 						.attr("cx", function(d) { return d.x; })
 						.attr("cy", function(d) { return d.y; })
+						.style("fill", function(d) { return d.color; })
 						.style("fill-opacity", 0)
 						.on("click", click);
 					
@@ -397,6 +401,11 @@
 					
 					//On click an out-of-topic concept, navigate to that topic map
 					function click(d) {
+						svgGraph.selectAll(".ui").transition().style("fill-opacity", 0);
+						d3.select(this).transition().duration(200).style("fill-opacity", 0.25);
+						svgGraph.selectAll(".node").filter(function(n) { return n.GUID === d.GUID; })
+							.transition().duration(100).attr("r",radius*1.2)
+							.transition().duration(100).attr("r", function(d) { return d.radius; });
 						if (d.topicData.TopicGUID!==topicURL) {
 							window.location.href = "topicmap.html?topic=" + d.topicData.TopicGUID;
 						}
@@ -438,7 +447,6 @@
 		function zoomwidth() {
 			var sc = viewSize.width/graphSize.width;
 			if (sc > 1.25) { sc = 1.25; }
-			console.log(sc);
 			zoomset(0,0,sc);
 		}
 		
