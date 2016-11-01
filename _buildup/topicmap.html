@@ -110,6 +110,7 @@
 
 		var fontSize = 10, offset = 10, baseScale = 120;
 		var radius = 10, strokeWidth = 3;
+		var baseDelay = 300;
 		
 		var topicURL = String(window.location.search).substr(7,100);
 		var thisTopic;
@@ -152,10 +153,26 @@
 						d.rankY = d.y;
 						d.x = baseScale * (0.5 + d.x - minX);
 						d.y = baseScale * (0.5 + maxY - d.y);
+						d.delay = baseDelay * (d.rankX + 0.3 * Math.abs(d.rankY/maxY));
 						d.labelLines = getLines(d.ConceptName);
 						d.topicData = topicData.topics.filter(function(t) {
 							return t.TopicGUID === d.TopicGUID;
 						})[0];
+						if (d.NodeType=="Concept") {
+							d.radius = radius;
+							if (d.topicData.TopicGUID==topicURL) {
+								d.class = "node concept intopic";
+								d.color = d.topicData.Color;
+							} else {
+								d.class = "node concept topic";
+								d.color = "#cccccc";
+							}
+						} else {
+							d.class = "node elbow";
+							d.radius = strokeWidth/2;
+							d.color = "#cccccc";
+						}
+						console.log(d);
 					});
 					//Calculate the size of the graph svg
 					graphSize.width = baseScale * (1.2 + maxX - minX);
@@ -187,6 +204,9 @@
 						points = points + " " + (e.source.x + 0.5*(e.target.x-e.source.x)) + "," + (e.source.y + 0.5*(e.target.y-e.source.y));
 						points = points + " " + e.target.x + "," + e.target.y;
 						e.path = points;
+						e.delay = e.target.delay;
+						e.length = Math.sqrt(Math.pow(e.target.x - e.source.x,2) + Math.pow(e.target.y - e.source.y,2));
+						console.log(e);
 					});
 					
 					//Render the data to the SVG element
@@ -227,9 +247,11 @@
 					  .append("polyline")
 						.attr("class", "link")
 						.attr("points", function(d) { return d.path; })
-						.attr("marker-mid", "url(#arrow)")
+						//.attr("marker-mid", "url(#arrow)")
 						.style("stroke", "#cccccc")
-						.style("stroke-width", strokeWidth);
+						.style("stroke-width", strokeWidth)
+						.attr("stroke-dasharray", function(d) { return d.length + " " + d.length; })
+						.attr("stroke-dashoffset", function(d) { return d.length; });
 					
 					//Circles for each node
 					//Connectors/elbows need to be treated separately
@@ -237,28 +259,12 @@
 					var node = svgGraph.selectAll(".node")
 						.data(graph.nodes)
 						.enter().append("circle")
-						.attr("class", "node")
+						.attr("class", function(d) { return d.class; })
 						//Move all conditional logic to node setup, just write here
 						.attr("cx", function(d) { return d.x; })
 						.attr("cy", function(d) { return d.y; })
-						.attr("r", function(d) {
-							if (d.NodeType=="Concept") {
-								return radius;
-							} else {
-								return strokeWidth/2;
-							}	
-						})
-						.style("fill", function(d) {
-							if (d.NodeType=="Concept") {
-								if (d.topicData.TopicGUID==topicURL) {
-									return d.topicData.Color;
-								} else {
-									return "#cccccc";
-								}
-							} else {
-								return "#cccccc";
-							}
-						});
+						.attr("r", 0)
+						.style("fill", function(d) { return d.color; });
 				
 					//Text label for each node, includes background
 					//Allows label to wrap to up-to 3 lines
@@ -287,7 +293,7 @@
 					var lbl1 = svgGraph.selectAll(".lbl1")
 						.data(graph.nodes)
 						.enter().append("text")
-						.attr("class", "lbl1")
+						.attr("class", "lbl lbl1")
 						.text(function(d) {
 							if (d.NodeType=="Concept") {
 								return d.labelLines[0];
@@ -311,7 +317,7 @@
 					var lbl2 = svgGraph.selectAll(".lbl2")
 						.data(graph.nodes)
 						.enter().append("text")
-						.attr("class", "lbl2")
+						.attr("class", "lbl lbl2")
 						.text(function(d) {
 							if (d.NodeType=="Concept") {
 								return d.labelLines[1];
@@ -335,7 +341,7 @@
 					var lbl3 = svgGraph.selectAll(".lbl3")
 						.data(graph.nodes)
 						.enter().append("text")
-						.attr("class", "lbl3")
+						.attr("class", "lbl lbl3")
 						.text(function(d) {
 							if (d.NodeType=="Concept") {
 								return d.labelLines[2];
@@ -360,7 +366,7 @@
 					var lblHL = svgGraph.selectAll(".lblhl")
 						.data(graph.nodes)
 						.enter().append("text")
-						.attr("class", "lblhl")
+						.attr("class", "lbl lblhl")
 						.text(function(d) { return d.HLlevel; })
 						.attr("x", function(d) { return d.x; })
 						.attr("y", function(d) { return d.y + fontSize/3; })
@@ -393,10 +399,16 @@
 					//Initial map animation
 					function reveal() {
 						svgGraph.selectAll(".lblr").transition().duration(2000).attr("opacity", 0.5);
-						svgGraph.selectAll(".lbl1").transition().duration(2500).attr("opacity", 1);
-						svgGraph.selectAll(".lbl2").transition().duration(3000).attr("opacity", 1);
-						svgGraph.selectAll(".lbl3").transition().duration(3500).attr("opacity", 1);
-						svgGraph.selectAll(".lblHL").transition().duration(4000).attr("opacity", 1);
+						svgGraph.selectAll(".lbl").transition().duration(2500).attr("opacity", 1);
+						svgGraph.selectAll(".node").transition()
+							.delay(function(d) { return d.delay; }).duration(1000).ease("elastic")
+							.attr("r", function(d) { return d.radius; });
+						svgGraph.selectAll(".link").transition()
+							.delay(function(d) { return d.delay - 300; }).duration(300)
+							.attr("stroke-dashoffset", 0);
+						svgGraph.selectAll(".link").transition()
+							.delay(function(d) { return d.delay; }).duration(100)
+							.attr("marker-mid", "url(#arrow)");
 					}
 				}
 			});
