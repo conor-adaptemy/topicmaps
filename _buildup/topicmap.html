@@ -398,16 +398,18 @@
 					
 					//Initial map animation
 					function reveal() {
-						svgGraph.selectAll(".lblr").transition().duration(2000).attr("opacity", 0.5);
-						svgGraph.selectAll(".lbl").transition().duration(2500).attr("opacity", 1);
+						svgGraph.selectAll(".lblr").transition()
+							.delay(function(d) { return d.delay; }).duration(baseDelay).attr("opacity", 0.5);
+						svgGraph.selectAll(".lbl").transition()
+							.delay(function(d) { return d.delay; }).duration(baseDelay).attr("opacity", 1);
 						svgGraph.selectAll(".node").transition()
-							.delay(function(d) { return d.delay; }).duration(1000).ease("elastic")
+							.delay(function(d) { return d.delay; }).duration(baseDelay*3).ease("elastic")
 							.attr("r", function(d) { return d.radius; });
-						svgGraph.selectAll(".link").transition()
-							.delay(function(d) { return d.delay - 300; }).duration(300)
+						svgGraph.selectAll(".link").transition().ease("linear")
+							.delay(function(d) { return d.delay - baseDelay; }).duration(baseDelay)
 							.attr("stroke-dashoffset", 0);
 						svgGraph.selectAll(".link").transition()
-							.delay(function(d) { return d.delay; }).duration(100)
+							.delay(function(d) { return d.delay; }).duration(baseDelay/3)
 							.attr("marker-mid", "url(#arrow)");
 					}
 				}
