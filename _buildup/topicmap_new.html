@@ -13,15 +13,15 @@
 		body {
 			background-color: #ffffff;
 			overflow-x: hidden;
-			margin: 4px;
+			margin: 0px;
 			font-family: "PT Sans",sans-serif;
 		}
 		.titleBar {
 			position: fixed;
 			width: 100%;
 			height: 60px;
-			background-color: white;
-			opacity: 50%;
+			padding: 8px;
+			background-color: rgba(255,255,255,0.7);
 		}
 		.topicIconContainer {
 			margin-right: 14px;
@@ -58,7 +58,7 @@
 			position: fixed;
 			right: 10px;
 			padding-left: 14px;
-			border-left: 1px solid #e9e9e9;
+			border-left: 2px solid #e9e9e9;
 		}
 		@media (max-width: 600px) {
 			.courseInfo { display: none; }
@@ -83,6 +83,14 @@
 			top: 0px;
 			z-index: -500;
 		}
+		.actionBar {
+			position: fixed;
+			width: 100%;
+			height: 60px;
+			padding: 8px;
+			top: 120px;
+			background-color: rgba(255,255,255,0.7);
+		}
 		.link { stroke: #cccccc; }
 		.lblr { fill: white; }
 		.lbl {
@@ -90,6 +98,7 @@
 			font-family: sans-serif;
 			fill: #666666;
 		}
+		.lblhl { fill: white; }
 		.ui { cursor: pointer; }
 	</style>
 	        
@@ -114,6 +123,8 @@
 		<div id="topicMapArea" style="background-color: #ffffff;">
 			<div id="topicMapCanvas" style="background-color: #ffffff;"></div></>
 		</div>
+
+		<div class="actionBar"></div>
 	</div>
 	
 	<script type="text/javascript">
@@ -127,14 +138,16 @@
 		var viewSize = {width: 960, height: 600};
 
 		var fontSize = 10, offset = 10, baseScale = 120;
-		var radius = 10, strokeWidth = 3;
+		var radius = 12, strokeWidth = 3;
 		var baseDelay = 300;
+		var headerPixels;
 		
 		var topicURL = String(window.location.search).substr(7,100);
 		var thisTopic;
 		
 		//Load list of topics, with their data
 		d3.json("topics.json", function(error, topicData) {
+			if (error) { console.log(error); } else {
 			topicData.topics.forEach(function(t,i) {
 				if (t.TopicGUID==topicURL) {
 					thisTopic = t;
@@ -171,7 +184,7 @@
 						d.rankY = d.y;
 						d.x = baseScale * (0.5 + d.x - minX);
 						d.y = baseScale * (0.5 + maxY - d.y);
-						d.delay = baseDelay * (d.rankX + 0.3 * Math.abs(d.rankY/maxY));
+						d.delay = 1000 + baseDelay * (d.rankX + 0.3 * Math.abs(d.rankY/maxY));
 						d.labelLines = getLines(d.ConceptName);
 						d.topicData = topicData.topics.filter(function(t) {
 							return t.TopicGUID === d.TopicGUID;
@@ -187,17 +200,19 @@
 							}
 						} else {
 							d.class = "node elbow";
-							d.radius = strokeWidth/2;
+							d.radius = strokeWidth/2; 
 							d.color = "#cccccc";
 						}
-						console.log(d);
+						//console.log(d);
 					});
 					//Calculate the size of the graph svg
 					graphSize.width = baseScale * (1.2 + maxX - minX);
-					graphSize.height = baseScale * (1 + maxY - minY) + 70;
+					graphSize.height = baseScale * (1 + maxY - minY);
+					headerPixels = d3.select(".titleBar").node().getBoundingClientRect().height;
 					//Set up the dimensions for rendering
-					viewSize.width = window.innerWidth - 10;
-					viewSize.height = window.innerHeight - 10;
+					viewSize.width = window.innerWidth;
+					viewSize.height = window.innerHeight;
+					d3.select(".actionBar").style("top",viewSize.height-60);
 					svgViewbox = d3.select('#topicMapCanvas').append("svg")
 						.attr("width", viewSize.width)
 						.attr("height", viewSize.height)
@@ -224,7 +239,7 @@
 						e.path = points;
 						e.delay = e.target.delay;
 						e.length = Math.sqrt(Math.pow(e.target.x - e.source.x,2) + Math.pow(e.target.y - e.source.y,2));
-						console.log(e);
+						//console.log(e);
 					});
 					
 					//Render the data to the SVG element
@@ -277,6 +292,7 @@
 						.data(graph.nodes)
 						.enter().append("circle")
 						.attr("class", function(d) { return d.class; })
+						//Move all conditional logic to node setup, just write here
 						.attr("cx", function(d) { return d.x; })
 						.attr("cy", function(d) { return d.y; })
 						.attr("r", 0)
@@ -380,44 +396,51 @@
 						.attr("opacity",0);
 					//Invisible clickable area above each node
 					var ui = svgGraph.selectAll(".ui")
-						.data(graph.nodes)
+						.data(graph.nodes.filter(function(d){ return d.NodeType=="Concept"; }))
 						.enter().append("circle")
 						.attr("class", "ui")
-						.attr("r", 30)					
+						.attr("r", 24)					
 						.attr("cx", function(d) { return d.x; })
 						.attr("cy", function(d) { return d.y; })
+						.style("fill", function(d) { return d.color; })
 						.style("fill-opacity", 0)
 						.on("click", click);
 					
 					zoomwidth();
 					reveal();
-					
 				}
-			});
-		});
-					//On click an out-of-topic concept, navigate to that topic map
-					function click(d) {
-						if (d.topicData.TopicGUID!==topicURL) {
-							window.location.href = "topicmap.html?topic=" + d.topicData.TopicGUID;
-						}
-					}
-					
-					//Initial map animation
-					function reveal() {
-						svgGraph.selectAll(".lblr").transition()
-							.delay(function(d) { return d.delay; }).duration(baseDelay).attr("opacity", 0.5);
-						svgGraph.selectAll(".lbl").transition()
-							.delay(function(d) { return d.delay; }).duration(baseDelay*3).attr("opacity", 1);
-						svgGraph.selectAll(".node").transition()
-							.delay(function(d) { return d.delay; }).duration(baseDelay*3).ease("elastic")
-							.attr("r", function(d) { return d.radius; });
-						svgGraph.selectAll(".link").transition().ease("linear")
-							.delay(function(d) { return d.delay - baseDelay; }).duration(baseDelay)
-							.attr("stroke-dashoffset", 0);
-						svgGraph.selectAll(".link").transition()
-							.delay(function(d) { return d.delay; }).duration(baseDelay/3)
-							.attr("marker-mid", "url(#arrow)");
-					}
+			});}
+		});		
+		
+		//On click an out-of-topic concept, navigate to that topic map
+		function click(d) {
+			svgGraph.selectAll(".ui").classed("nodeSelected", false).transition().style("fill-opacity", 0);
+			d3.select(this).classed("nodeSelected", true).transition().duration(200).style("fill-opacity", 0.25);
+			svgGraph.selectAll(".concept").filter(function(n) { return n.GUID === d.GUID; })
+				.transition().duration(100).attr("r",radius*1.2)
+				.transition().duration(100).attr("r", function(d) { return d.radius; });
+			zoomFocus();
+			if (d.topicData.TopicGUID!==topicURL) {
+				window.location.href = "topicmap.html?topic=" + d.topicData.TopicGUID;
+			}
+		}
+		
+		//Initial map animation
+		function reveal() {
+			svgGraph.selectAll(".lblr").transition()
+				.delay(function(d) { return d.delay; }).duration(baseDelay).attr("opacity", 0.5);
+			svgGraph.selectAll(".lbl").transition()
+				.delay(function(d) { return d.delay; }).duration(baseDelay*3).attr("opacity", 1);
+			svgGraph.selectAll(".node").transition()
+				.delay(function(d) { return d.delay; }).duration(baseDelay*3).ease("elastic")
+				.attr("r", function(d) { return d.radius; });
+			svgGraph.selectAll(".link").transition().ease("linear")
+				.delay(function(d) { return d.delay - baseDelay; }).duration(baseDelay)
+				.attr("stroke-dashoffset", 0);
+			svgGraph.selectAll(".link").transition()
+				.delay(function(d) { return d.delay; }).duration(baseDelay/3)
+				.attr("marker-mid", "url(#arrow)");
+		}
 		
 		//Main map zoom function, called by d3.behaviour.zoom
 		function zoomed() {
@@ -430,13 +453,32 @@
 			zoom.event(svgViewbox);
 		}		
 		function zoomreset() {
-			zoomset(0,0,1.25);
+			zoomset(0,headerPixels,1.25);
 		}
 		function zoomwidth() {
 			var sc = viewSize.width/graphSize.width;
-			if (sc > 1.25) { sc = 1.25; }
-			console.log(sc);
-			zoomset(0,0,sc);
+			if (sc > 1.5) { sc = 1.5; }
+			if (sc < 0.75) { sc = 0.75; }
+			zoomset(0,headerPixels,sc);
+			//console.log("Zoom: scale=" + sc + ", top-margin=" + headerPixels);
+		}
+		//Focus node: in this order:
+		//1. Selected node; 2. Recommended node; 3. First in-topic node.
+		function findFocusNode() {
+			var focusNode;
+			//console.log(svgGraph.selectAll(".nodeSelected").attr("cx"));
+			//console.log(svgGraph.selectAll(".nodeSelected"));
+			return focusNode;
+		}
+		
+		function zoomFocus() {
+			var focusNode = findFocusNode();
+			// find current pan offset
+			// find in-graph cx,cy of focus node, and transform back to cx1, cy1 (scale, pan)
+			// define bounds based on viewSize and some margin
+			// check if cx1 is in bounds: if lower move to min, if higher move to max
+			// same for cy1
+			// 
 		}
 		
 		//iPads need to relayout on orientation change
@@ -449,7 +491,7 @@
 			event.preventDefault();
 		}, false);
 		
-		//Helper function to split ConceptNames over 2 lines
+		//Helper function to split ConceptNames over 3 lines
 		function getLines(fullname) {
 			var lines = new Array;
 			var minNewline = 16;
