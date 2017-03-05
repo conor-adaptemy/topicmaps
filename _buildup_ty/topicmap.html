@@ -20,6 +20,8 @@
 			position: fixed;
 			width: 100%;
 			height: 60px;
+			background-color: white;
+			opacity: 50%;
 		}
 		.topicIconContainer {
 			margin-right: 14px;
@@ -80,6 +82,13 @@
 			position: fixed;
 			top: 0px;
 			z-index: -500;
+		}
+		.link { stroke: #cccccc; }
+		.lblr { fill: white; }
+		.lbl {
+			text-anchor: middle;
+			font-family: sans-serif;
+			fill: #666666;
 		}
 		.ui { cursor: pointer; }
 	</style>
@@ -161,7 +170,7 @@
 						d.rankX = d.x;
 						d.rankY = d.y;
 						d.x = baseScale * (0.5 + d.x - minX);
-						d.y = baseScale * (0.5 + maxY - d.y) + 60;
+						d.y = baseScale * (0.5 + maxY - d.y);
 						d.delay = baseDelay * (d.rankX + 0.3 * Math.abs(d.rankY/maxY));
 						d.labelLines = getLines(d.ConceptName);
 						d.topicData = topicData.topics.filter(function(t) {
@@ -257,7 +266,6 @@
 						.attr("class", "link")
 						.attr("points", function(d) { return d.path; })
 						//.attr("marker-mid", "url(#arrow)")
-						.style("stroke", "#cccccc")
 						.style("stroke-width", strokeWidth)
 						.attr("stroke-dasharray", function(d) { return d.length + " " + d.length; })
 						.attr("stroke-dashoffset", function(d) { return d.length; });
@@ -269,7 +277,6 @@
 						.data(graph.nodes)
 						.enter().append("circle")
 						.attr("class", function(d) { return d.class; })
-						//Move all conditional logic to node setup, just write here
 						.attr("cx", function(d) { return d.x; })
 						.attr("cy", function(d) { return d.y; })
 						.attr("r", 0)
@@ -297,7 +304,6 @@
 							}
 						})
 						.attr("height", function(d) { return (offset*d.labelLines.length); })
-						.attr("fill", "white")
 						.attr("opacity", 0);
 					var lbl1 = svgGraph.selectAll(".lbl1")
 						.data(graph.nodes)
@@ -318,10 +324,7 @@
 								return d.y + radius -1+ offset;;
 							}
 						})
-						.attr("text-anchor", "middle")
-						.attr("font-family", "sans-serif")
 						.attr("font-size", fontSize)
-						.attr("fill","#666666")
 						.attr("opacity",0);
 					var lbl2 = svgGraph.selectAll(".lbl2")
 						.data(graph.nodes)
@@ -342,10 +345,7 @@
 								return d.y + radius -1+ offset*2;;
 							}
 						})
-						.attr("text-anchor", "middle")
-						.attr("font-family", "sans-serif")
 						.attr("font-size", fontSize)
-						.attr("fill","#666666")
 						.attr("opacity",0);
 					var lbl3 = svgGraph.selectAll(".lbl3")
 						.data(graph.nodes)
@@ -366,10 +366,7 @@
 								return d.y + radius -1+ offset*3;;
 							}
 						})
-						.attr("text-anchor", "middle")
-						.attr("font-family", "sans-serif")
 						.attr("font-size", fontSize)
-						.attr("fill","#666666")
 						.attr("opacity",0);
 					//Label in each node to indicate variant/level
 					var lblHL = svgGraph.selectAll(".lblhl")
@@ -379,10 +376,7 @@
 						.text(function(d) { return d.HLlevel; })
 						.attr("x", function(d) { return d.x; })
 						.attr("y", function(d) { return d.y + fontSize/3; })
-						.attr("text-anchor", "middle")
-						.attr("font-family", "sans-serif")
 						.attr("font-size", fontSize)
-						.attr("fill","#ffffff")
 						.attr("opacity",0);
 					//Invisible clickable area above each node
 					var ui = svgGraph.selectAll(".ui")
@@ -398,6 +392,9 @@
 					zoomwidth();
 					reveal();
 					
+				}
+			});
+		});
 					//On click an out-of-topic concept, navigate to that topic map
 					function click(d) {
 						if (d.topicData.TopicGUID!==topicURL) {
@@ -421,9 +418,6 @@
 							.delay(function(d) { return d.delay; }).duration(baseDelay/3)
 							.attr("marker-mid", "url(#arrow)");
 					}
-				}
-			});
-		});
 		
 		//Main map zoom function, called by d3.behaviour.zoom
 		function zoomed() {
