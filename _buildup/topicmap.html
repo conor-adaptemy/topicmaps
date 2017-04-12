@@ -195,7 +195,7 @@
 						}
 						//console.log(d);
 					});
-					//Calculate the size of the graph svg
+					//Calculate the size of the graph svg, updating master
 					graphSize.width = baseScale * (1.2 + maxX - minX);
 					graphSize.height = baseScale * (1 + maxY - minY);
 					headerPixels = d3.select(".titleBar").node().getBoundingClientRect().height;
