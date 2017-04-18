@@ -9,10 +9,28 @@
     <link rel="icon" href="favicon.png" type="image/x-icon"/>
     <link rel="shortcut icon" href="favicon.png" type="image/x-icon"/>
     <script type="text/javascript" src="js/d3.js"></script>
-    <script type="text/javascript" src="js/topicmap.js"></script>
     <link rel="stylesheet" href="buildup.css" >
 </head>
 <body>
-<p>Hello</p>
+<div class="pageContainer">
+    <div class="titleBar">
+        <div class="topicIconContainer">
+            <div class="topicIcon" onclick="zoomwidth()"></div>
+        </div>
+        <div class="topicTitle">
+            <div class="strandName"><b>Strand: <span id="strandNameText"></span></b></div>
+            <div class="topicName"></div>
+        </div>
+        <div class="courseInfo">
+            <div class="logo" onclick="zoomreset()"></div>
+            <div class="courseName">TY Maths</div>
+        </div>
+    </div>
+    <div id="topicMapArea">
+        <div id="topicMapCanvas"></div>
+    </div>
+</div>
+<div class="actionBar"></div>
+<script type="text/javascript" src="js/topicmap.js"></script>
 </body>
 </html>
